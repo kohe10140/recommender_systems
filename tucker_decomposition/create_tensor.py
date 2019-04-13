@@ -21,45 +21,34 @@ class CreateTensor:
         self.df = df
         self.value_name = value_name
         self.mode = mode
-        ## Allocate id to each mode ######################
-        self.labels = []
-        self.uniques = []
-        for col_name in mode:
-            label, unique = allocate_id(df, col_name)
-            self.labels.append(label)
-            self.uniques.append(unique)
-        ##################################################
+#        ## Allocate id to each mode ######################
+        self.labels = [allocate_id(self.df, col_name)[0] for col_name in mode]
+        self.uniques = [allocate_id(self.df, col_name)[1] for col_name in mode]
+#        self.labels = []
+#        self.uniques = []
+#        for col_name in mode:
+#            label, unique = allocate_id(df, col_name)
+#            self.labels.append(label)
+#            self.uniques.append(unique)
+#        ##################################################
         self.shape = tuple([len(unique) for unique in self.uniques])
         self.tensor = np.full(self.shape, np.nan)
 
 
-    def create_tensor_from_df(self, df, how_fillna='column_mean'):
+    def create_tensor_from_df(self, missing_val='mean'):
+        self.missing_val = missing_val
         self.mode_ids = [col_name + '_id' for col_name in self.mode]
 
-        self.dataset = df[self.mode_ids + [self.value_name]]
-        self.indexes = df[self.mode_ids]
-        self.values = df[self.value_name]
+        self.dataset = self.df[self.mode_ids + [self.value_name]]
+        self.indexes = self.df[self.mode_ids]
+        self.values = self.df[self.value_name]
         
         self.tensor[list(self.indexes.values.T)] = self.values.values
 
-        if how_fillna == 'column_mean':
-            dataframe = pd.DataFrame(self.tensor)
-            dataframe = dataframe.fillna(dataframe.mean())
-            self.tensor = dataframe.values            
-
-        elif how_fillna == 'row_mean':
-            dataframe = pd.DataFrame(self.tensor.T)
-            dataframe = dataframe.fillna(dataframe.mean())
-            self.tensor = dataframe.values.T            
-
-        elif how_fillna == 'global_mean':
+        if missing_val == 'mean':
             self.tensor[np.isnan(self.tensor)] = np.nanmean(self.tensor)
-
         else:
-            raise Exception('invalid method')
-            # ToDo : preprocessing default values for tensor
+            self.tensor[np.isnan(self.tensor)] = self.missing_val
 
-        self.dataset = melting_matrix(self.tensor)
-
-        return self.dataset
+        return self.tensor
             

@@ -1,5 +1,4 @@
 import numpy as np
-from numpy.linalg import svd
 from sklearn.base import BaseEstimator, RegressorMixin
 from sklearn.metrics import mean_squared_error
 from sklearn.decomposition import TruncatedSVD
@@ -11,10 +10,11 @@ from recommender_systems.create_tensor import CreateTensor
 
 class TuckerRecommendation(BaseEstimator, RegressorMixin):
     
-    def __init__(self, shape=[None, None, None], rank=[None, None, None],
+    def __init__(self, shape=[None, None, None], rank=[None, None, None], missing_val='mean',
                  n_iter_max=100, tol=0.0001, random_state=0, verbose=False):
         self.shape = shape
         self.rank = rank
+        self.missing_val = missing_val   
         self.n_iter_max = n_iter_max
         self.tol = tol
         self.random_state = random_state
@@ -25,7 +25,12 @@ class TuckerRecommendation(BaseEstimator, RegressorMixin):
         X = X.astype(int)
         tensor = np.full(self.shape, np.nan)
         tensor[list(X.T)] = y
-        tensor[np.isnan(tensor)] = np.nanmean(tensor)
+
+        if self.missing_val == 'mean':
+            tensor[np.isnan(tensor)] = np.nanmean(tensor)
+        else:
+            tensor[np.isnan(tensor)] = self.missing_val
+
         self.core, self.factors = tucker(tensor, rank=self.rank, n_iter_max=self.n_iter_max,
                                          tol=self.tol, random_state=self.random_state,
                                          verbose=self.verbose)
@@ -48,16 +53,21 @@ class TuckerRecommendation(BaseEstimator, RegressorMixin):
 
 class SVD(BaseEstimator, RegressorMixin):
 
-    def __init__(self, shape, rank=None):
+    def __init__(self, shape, rank=None, missing_val='mean'):
         self.shape = shape
         self.rank = rank
+        self.missing_val = missing_val
 
 
     def fit(self, X, y):
         self.R = np.full(self.shape, np.nan)
         X = X.astype(int)
         self.R[list(X.T)] = y
-        self.R[np.isnan(self.R)] = np.nanmean(self.R)
+
+        if missing_val == 'mean':
+            self.R[np.isnan(self.R)] = np.nanmean(self.R)
+        else:
+            self.R[np.isnan(self.R)] = missing_val
 
         t_svd = TruncatedSVD(n_components=self.rank, random_state=0)
         self.U = t_svd.fit_transform(self.R)
