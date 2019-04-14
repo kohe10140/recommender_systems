@@ -5,7 +5,7 @@ from sklearn.decomposition import TruncatedSVD
 import tensorly as tl
 from tensorly.decomposition import tucker
 
-from recommender_systems.create_tensor import CreateTensor
+#from recommender_systems.create_tensor import CreateTensor
 
 
 class TuckerRecommendation(BaseEstimator, RegressorMixin):
