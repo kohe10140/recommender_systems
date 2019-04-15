@@ -45,7 +45,7 @@ class CreateTensor:
         
         self.tensor[list(self.indexes.values.T)] = self.values.values
 
-        if missing_val == 'mean':
+        if self.missing_val == 'mean':
             self.tensor[np.isnan(self.tensor)] = np.nanmean(self.tensor)
         else:
             self.tensor[np.isnan(self.tensor)] = self.missing_val
