@@ -24,13 +24,7 @@ class CreateTensor:
 #        ## Allocate id to each mode ######################
         self.labels = [allocate_id(self.df, col_name)[0] for col_name in mode]
         self.uniques = [allocate_id(self.df, col_name)[1] for col_name in mode]
-#        self.labels = []
-#        self.uniques = []
-#        for col_name in mode:
-#            label, unique = allocate_id(df, col_name)
-#            self.labels.append(label)
-#            self.uniques.append(unique)
-#        ##################################################
+        ##################################################
         self.shape = tuple([len(unique) for unique in self.uniques])
         self.tensor = np.full(self.shape, np.nan)
 

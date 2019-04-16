@@ -20,21 +20,5 @@ class TestTuckerDecompostion(unittest.TestCase):
             self.assertEqual(actual, expected)
 
 
-#    def test_fit_core_factors(self):
-#        np.random.seed(0)
-#        list_rank = [[2, 5, 4]]
-#        list_X_train = [np.random.random((10, 10, 10))]
-#        for rank, X_train in zip(list_rank, list_X_train):
-#            tr = tensor_decomposition.TuckerRecommendation(rank=rank)
-#            tr.fit(X_train, )
-#            actual_core = tr.core
-#            actual_factors = tr.factors
-#            expect_core, expected_factors = tucker(X_train, rank=rank)
-#
-#            self.assertEqual(actual_core.all(), expect_core.all())
-#            for i in range(len(rank)):
-#                self.assertEqual(actual_factors[i].all(), expected_factors[i].all())
-
-
 if __name__ == '__main__':
     unittest.main()
