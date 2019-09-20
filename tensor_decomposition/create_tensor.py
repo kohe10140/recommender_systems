@@ -21,7 +21,7 @@ class CreateTensor:
         self.df = df
         self.value_name = value_name
         self.mode = mode
-#        ## Allocate id to each mode ######################
+        ## Allocate id to each mode ######################
         self.labels = [allocate_id(self.df, col_name)[0] for col_name in mode]
         self.uniques = [allocate_id(self.df, col_name)[1] for col_name in mode]
         ##################################################
@@ -30,6 +30,20 @@ class CreateTensor:
 
 
     def create_tensor_from_df(self, missing_val='mean'):
+        """
+        attributes
+            self.tensor : numpy array
+                tensor to be decomposed 
+
+            self.dataset : pandas dataframe
+                trimed dataset that has columns of mode and entries of the tensor
+
+            self.indexes : pandas dataframe
+                labels of the tensor's mode
+
+            self.values : pandas series
+                entries of the tensor
+        """
         self.missing_val = missing_val
         self.mode_ids = [col_name + '_id' for col_name in self.mode]
 
