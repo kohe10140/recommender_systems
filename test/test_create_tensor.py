@@ -5,7 +5,7 @@ import pandas as pd
 from pandas.util.testing import assert_frame_equal
 from tensorly.decomposition import tucker
 
-from tensor_decomposition import create_tensor
+from recommender_systems.tensor_decomposition import create_tensor
 
 class TestCreateTensor(unittest.TestCase):
 
