@@ -3,10 +3,17 @@ import pandas as pd
 import tensorly as tl
 
 
-def allocate_id(df, col_name):
-    label, unique = pd.factorize(df[col_name])
+def allocate_id(df, col_name, mode_member=None):
     col_name_id = col_name + '_id'
-    df[col_name_id] = label
+    if mode_member is not None:
+        mode_member = mode_member.astype(object)
+        unique = mode_member
+        label = np.array([np.where(str(data)==mode_member)[0][0] for data in df[col_name]]) 
+        df[col_name_id] = list(label)
+    else:
+        label, unique = pd.factorize(df[col_name])
+        df[col_name_id] = list(label)
+    df[col_name_id] = df[col_name_id].astype(np.int64)
     return label, unique
 
 
@@ -17,13 +24,27 @@ def melting_matrix(x):
 
 class CreateTensor:
     
-    def __init__(self, df, value_name, mode=[None, None, None]):
+    def __init__(self, df, value_name, mode=[None], mode_members=None):
+        """
+        argument
+            value_name <str> : the name of data to be in the tensor
+            mode <list> : A column name of the dataframe
+                          Example ['dog', 'cat', 'monkey']
+            mode_members <list> : The entry's label of each mode
+                            labels' elements should be Numpy Array
+                            Example labels[0] = ['shiba', 'husky', 'retriever']
+        """
         self.df = df
         self.value_name = value_name
         self.mode = mode
+        self.mode_members = mode_members 
         ## Allocate id to each mode ######################
-        self.labels = [allocate_id(self.df, col_name)[0] for col_name in mode]
-        self.uniques = [allocate_id(self.df, col_name)[1] for col_name in mode]
+        if mode_members != None:
+            self.labels = [allocate_id(self.df, col_name, mode_member)[0] for col_name, mode_member in zip(mode, mode_members)]
+            self.uniques = [allocate_id(self.df, col_name, mode_member)[1] for col_name, mode_member in zip(mode, mode_members)]
+        else:
+            self.labels = [allocate_id(self.df, col_name)[0] for col_name in mode]
+            self.uniques = [allocate_id(self.df, col_name)[1] for col_name in mode]
         ##################################################
         self.shape = tuple([len(unique) for unique in self.uniques])
         self.tensor = np.full(self.shape, np.nan)

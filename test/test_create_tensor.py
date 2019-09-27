@@ -28,6 +28,24 @@ class TestCreateTensor(unittest.TestCase):
         assert_frame_equal(actual_df, df)
 
 
+    def test_allocate_id(self):
+        df = pd.DataFrame([['hoge_a', 'foo_a', 'bar_a'],
+                           ['hoge_b', 'foo_b', 'bar_a'],
+                           ['hoge_b', 'foo_c', 'bar_b']
+                          ]
+                         )
+        df.columns = ['hoge', 'foo', 'bar']
+
+        actual_df = df.copy()
+        col_name = 'hoge'
+        mode_member = np.array(['hoge_a', 'hoge_b', 'hoge_c'])
+        actual_label, actual_unique = create_tensor.allocate_id(actual_df, col_name, mode_member)
+
+        df['hoge_id'] = [0, 1, 1]
+                                                                                   
+        assert_frame_equal(actual_df, df)
+
+
     def test_melting_matrix(self):
         list_x = [np.array([[5. ,  4.],
                             [-2.5, 0.]])
