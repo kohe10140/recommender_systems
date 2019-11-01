@@ -23,17 +23,42 @@ def melting_matrix(x):
 
 
 class CreateTensor:
-    
+    """
+    To create the tensor to decomposite
+
+    Attributes
+    ----------
+        value_name : str
+            the name of data to be entries of the tensor
+
+        mode : list 
+            A column name of the dataframe
+
+        mode_members : list of numpy.array
+            The entry's label of each mode
+        
+        tensor : numpy.array
+            tensor to be decomposed 
+
+        dataset : pandas.dataframe
+            trimed dataset that has columns of mode and entries of the tensor
+
+        indexes : pandas.dataframe
+            labels of the tensor's mode
+
+        values : pandas.series
+            entries of the tensor
+
+    Examples
+    --------
+    >>> mode = ['dog', 'cat', 'monkey'] 
+    >>> dog_breeds = np.array(['shiba', 'husky', 'retriever'])
+    ...
+    >>> mode_members = [dog_breeds, cat_breeds, monkey_breeds] 
+    >>> ct = CreateTensor(df, 'average_weight', mode, mode_member)
+    """
+
     def __init__(self, df, value_name, mode=[None], mode_members=None):
-        """
-        argument
-            value_name <str> : the name of data to be in the tensor
-            mode <list> : A column name of the dataframe
-                          Example ['dog', 'cat', 'monkey']
-            mode_members <list> : The entry's label of each mode
-                            labels' elements should be Numpy Array
-                            Example labels[0] = ['shiba', 'husky', 'retriever']
-        """
         self.df = df
         self.value_name = value_name
         self.mode = mode
@@ -51,20 +76,6 @@ class CreateTensor:
 
 
     def create_tensor_from_df(self, missing_val='mean'):
-        """
-        attributes
-            self.tensor : numpy array
-                tensor to be decomposed 
-
-            self.dataset : pandas dataframe
-                trimed dataset that has columns of mode and entries of the tensor
-
-            self.indexes : pandas dataframe
-                labels of the tensor's mode
-
-            self.values : pandas series
-                entries of the tensor
-        """
         self.missing_val = missing_val
         self.mode_ids = [col_name + '_id' for col_name in self.mode]
 
