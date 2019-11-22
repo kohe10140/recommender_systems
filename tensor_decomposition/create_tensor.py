@@ -8,7 +8,7 @@ def allocate_id(df, col_name, mode_member=None):
     if mode_member is not None:
         mode_member = mode_member.astype(object)
         unique = mode_member
-        label = np.array([np.where(str(data)==mode_member)[0][0] for data in df[col_name]]) 
+        label = np.array([np.where(data==mode_member)[0][0] for data in df[col_name]]) 
         df[col_name_id] = list(label)
     else:
         label, unique = pd.factorize(df[col_name])
