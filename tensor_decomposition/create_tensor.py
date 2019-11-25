@@ -83,7 +83,7 @@ class CreateTensor:
         self.indexes = self.df[self.mode_ids]
         self.values = self.df[self.value_name]
         
-        self.tensor[list(self.indexes.values.T)] = self.values.values
+        self.tensor[tuple(self.indexes.values.T)] = self.values.values
 
         if self.missing_val == 'mean':
             self.tensor[np.isnan(self.tensor)] = np.nanmean(self.tensor)
