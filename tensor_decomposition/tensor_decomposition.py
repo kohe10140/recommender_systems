@@ -24,7 +24,7 @@ class TuckerRecommendation(BaseEstimator, RegressorMixin):
     def fit(self, X, y):
         X = X.astype(int)
         tensor = np.full(self.shape, np.nan)
-        tensor[list(X.T)] = y
+        tensor[tuple(X.T)] = y
 
         if self.missing_val == 'mean':
             tensor[np.isnan(tensor)] = np.nanmean(tensor)
@@ -41,7 +41,7 @@ class TuckerRecommendation(BaseEstimator, RegressorMixin):
 
     def predict(self, test_X):
         tucker_tensor = self.tucker_tensor
-        return tucker_tensor[list(test_X.T)]
+        return tucker_tensor[tuple(test_X.T)]
     
             
     def score(self, test_X, test_y):
