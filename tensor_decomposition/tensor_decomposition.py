@@ -64,10 +64,10 @@ class SVD(BaseEstimator, RegressorMixin):
         X = X.astype(int)
         self.R[list(X.T)] = y
 
-        if missing_val == 'mean':
+        if self.missing_val == 'mean':
             self.R[np.isnan(self.R)] = np.nanmean(self.R)
         else:
-            self.R[np.isnan(self.R)] = missing_val
+            self.R[np.isnan(self.R)] = self.missing_val
 
         t_svd = TruncatedSVD(n_components=self.rank, random_state=0)
         self.U = t_svd.fit_transform(self.R)
@@ -88,6 +88,3 @@ class SVD(BaseEstimator, RegressorMixin):
         prediction = self.predict(test_X)
         mse = mean_squared_error(test_y, prediction)
         return -np.sqrt(mse)
-
-
-
