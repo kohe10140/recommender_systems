@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 from sklearn.base import BaseEstimator, RegressorMixin, ClassifierMixin
 from sklearn.metrics import mean_squared_error
 from sklearn.decomposition import TruncatedSVD
@@ -58,14 +59,14 @@ class SimTucker(TuckerRecommendation):
         """
         sym_df : pandas.DataFrame
             ex.) obj_A is symmetric with obj_B
-             idx|obj_A|obj_B|obj_C|value|
-            ----|-----|-----|-----|-----|
-               0|    0|    1|    1|    1| ---
-               1|    1|    2|    1|    3|    |- P
-               2|    2|    3|    0|   -1| ---   
-               0|    1|    0|    1|    1| ---   
-               1|    2|    1|    1|    3|    |- Q
-               2|    3|    2|    0|   -1| ---
+             idx|obj_A|obj_B|obj_C|
+            ----|-----|-----|-----|
+               0|    0|    1|    1| ---
+               1|    1|    2|    1|    |- P
+               2|    2|    3|    0| ---   
+               0|    1|    0|    1| ---   
+               1|    2|    1|    1|    |- Q
+               2|    3|    2|    0| ---
 
             -> P is symmetric with Q in the upper table.
             index must be indicate the same data.
@@ -76,9 +77,37 @@ class SimTucker(TuckerRecommendation):
         self.sym_df = sym_df
 
 
-    def predict(self, test_idx):
+    def fit(self, X, y):
+        """
+        X : ndarray of shape(n_samples)
+            The index(es) of training X.
+        y : ndarray of shape(n_samples)
+            The array of training y(objective variables).
+        """
+        X = self.sym_df.loc[X].values
+        y = np.hstack([y, y])
+        super().fit(X, y)
+
+
+    def predict(self, test_X):
+        """
+        X : ndarray of shape(n_samples)
+            The index(es) of training X.
+        """
+        df_test_X = self.sym_df.loc[test_X].values
         tucker_tensor = self.tucker_tensor
-        return tucker_tensor[tuple(test_X.T)]
+        pred_y = tucker_tensor[tuple(df_test_X.values.T)]
+        pred_y = pd.DataFrame(pred_y, index=self.df_test_X.index)
+        # Aggregate symmetory objects 
+        pred_y = pred_y.groupby(pred_y.index).mean().values.ravel()
+        return pred_y
+
+
+    def score(self, test_X, test_y):
+        test_X = test_X.astype(int)
+        prediction = self.predict(test_X)
+        mse = mean_squared_error(test_y, prediction)
+        return -np.sqrt(mse)
 
 
 class TuckerClassifier(BaseEstimator, ClassifierMixin):
