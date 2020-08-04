@@ -51,6 +51,36 @@ class TuckerRecommendation(BaseEstimator, RegressorMixin):
         return -np.sqrt(mse)
 
 
+class SimTucker(TuckerRecommendation):
+
+    def __init__(self, shape=[None, None, None], rank=[None, None, None], missing_val='mean',
+                 sym_df, n_iter_max=100, tol=0.0001, random_state=0, verbose=False):
+        """
+        sym_df : pandas.DataFrame
+            ex.) obj_A is symmetric with obj_B
+             idx|obj_A|obj_B|obj_C|value|
+            ----|-----|-----|-----|-----|
+               0|    0|    1|    1|    1| ---
+               1|    1|    2|    1|    3|    |- P
+               2|    2|    3|    0|   -1| ---   
+               0|    1|    0|    1|    1| ---   
+               1|    2|    1|    1|    3|    |- Q
+               2|    3|    2|    0|   -1| ---
+
+            -> P is symmetric with Q in the upper table.
+            index must be indicate the same data.
+            The size of sym_df must be equal to the size of X.
+        """
+        super().__init__(shape=[None, None, None], rank=[None, None, None], missing_val='mean',
+                         n_iter_max=100, tol=0.0001, random_state=0, verbose=False)
+        self.sym_df = sym_df
+
+
+    def predict(self, test_idx):
+        tucker_tensor = self.tucker_tensor
+        return tucker_tensor[tuple(test_X.T)]
+
+
 class TuckerClassifier(BaseEstimator, ClassifierMixin):
     
     def __init__(self, shape=[None, None, None], rank=[None, None, None], missing_val='mean',
