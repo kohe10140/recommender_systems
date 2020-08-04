@@ -24,18 +24,19 @@ class TuckerRecommendation(BaseEstimator, RegressorMixin):
 
     def fit(self, X, y):
         X = X.astype(int)
-        tensor = np.full(self.shape, np.nan)
-        tensor[tuple(X.T)] = y
+        self.tensor = np.full(self.shape, np.nan)
+        self.tensor[tuple(X.T)] = y
 
         if self.missing_val == 'mean':
-            tensor[np.isnan(tensor)] = np.nanmean(tensor)
+            self.tensor[np.isnan(self.tensor)] = np.nanmean(self.tensor)
         else:
-            tensor[np.isnan(tensor)] = self.missing_val
+            self.tensor[np.isnan(self.tensor)] = self.missing_val
 
-        self.core, self.factors = tucker(tensor, rank=self.rank, n_iter_max=self.n_iter_max,
+        self.core, self.factors = tucker(self.tensor, rank=self.rank, n_iter_max=self.n_iter_max,
                                          tol=self.tol, random_state=self.random_state,
                                          verbose=self.verbose)
 
+        # TODO: Confirm tensorly version '0.4.5'
         self.tucker_tensor = tl.tucker_to_tensor(self.core, self.factors)
         return self
 
@@ -52,12 +53,13 @@ class TuckerRecommendation(BaseEstimator, RegressorMixin):
         return -np.sqrt(mse)
 
 
-class SimTucker(TuckerRecommendation):
+class SymTucker(TuckerRecommendation):
 
     def __init__(self, shape=[None, None, None], rank=[None, None, None], missing_val='mean',
-                 sym_df, n_iter_max=100, tol=0.0001, random_state=0, verbose=False):
+                 sym_df=None, n_iter_max=100, tol=0.0001, random_state=0, verbose=False):
         """
         sym_df : pandas.DataFrame
+            A symmetoric dataframe of the exploration space.
             ex.) obj_A is symmetric with obj_B
              idx|obj_A|obj_B|obj_C|
             ----|-----|-----|-----|
@@ -72,8 +74,8 @@ class SimTucker(TuckerRecommendation):
             index must be indicate the same data.
             The size of sym_df must be equal to the size of X.
         """
-        super().__init__(shape=[None, None, None], rank=[None, None, None], missing_val='mean',
-                         n_iter_max=100, tol=0.0001, random_state=0, verbose=False)
+        super().__init__(shape=shape, rank=rank, missing_val=missing_val,
+                         n_iter_max=n_iter_max, tol=tol,  random_state=random_state, verbose=verbose)
         self.sym_df = sym_df
 
 
@@ -94,10 +96,10 @@ class SimTucker(TuckerRecommendation):
         X : ndarray of shape(n_samples)
             The index(es) of training X.
         """
-        df_test_X = self.sym_df.loc[test_X].values
+        df_test_X = self.sym_df.loc[test_X]
         tucker_tensor = self.tucker_tensor
         pred_y = tucker_tensor[tuple(df_test_X.values.T)]
-        pred_y = pd.DataFrame(pred_y, index=self.df_test_X.index)
+        pred_y = pd.DataFrame(pred_y, index=df_test_X.index)
         # Aggregate symmetory objects 
         pred_y = pred_y.groupby(pred_y.index).mean().values.ravel()
         return pred_y
